@@ -1,4 +1,4 @@
-package com.example.demo.adapter.web.order.adapter;
+package com.example.demo.web.order;
 
 import com.example.demo.application.service.GetOrderService;
 import com.example.demo.application.service.GetOrderService.GetOrderQuery;
@@ -6,15 +6,22 @@ import com.example.demo.application.service.GetOrderService.GetOrderResult;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Adapter for converting web requests to application queries and results to responses.
+ * REST controller for order retrieval.
  */
-@Component
+@RestController
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
-public class GetOrderAdapter {
+public class GetOrderController {
 
     private final GetOrderService getOrderService;
 
@@ -39,7 +46,9 @@ public class GetOrderAdapter {
                 BigDecimal itemsTotal, BigDecimal packagingFee, BigDecimal deliveryFee, BigDecimal finalAmount) {}
     }
 
-    public GetOrderResponse getOrder(String orderId, User user) {
+    @GetMapping("/orders/{orderId}")
+    @ResponseStatus(HttpStatus.OK)
+    public GetOrderResponse getOrder(@PathVariable String orderId, @AuthenticationPrincipal User user) {
         // Extract userId from User
         String userId = user.getUsername();
 
@@ -51,12 +60,6 @@ public class GetOrderAdapter {
         return toResponse(result);
     }
 
-    /**
-     * Converts a GetOrderResult to a GetOrderResponse.
-     *
-     * @param result the application result
-     * @return the web response
-     */
     private GetOrderResponse toResponse(GetOrderResult result) {
         List<GetOrderResponse.OrderItemData> itemDataList = result.items().stream()
                 .map(item -> new GetOrderResponse.OrderItemData(

@@ -1,14 +1,9 @@
-package com.example.demo.adapter.persistence.order.adapter;
+package com.example.demo.infrastructure.persistence.order;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.from;
 import static org.mockito.Mockito.*;
 
-import com.example.demo.adapter.persistence.order.DeliveryInfoEmbeddable;
-import com.example.demo.adapter.persistence.order.OrderEntity;
-import com.example.demo.adapter.persistence.order.OrderEntityRepository;
-import com.example.demo.adapter.persistence.order.OrderItemEntity;
-import com.example.demo.adapter.persistence.order.PricingEmbeddable;
 import com.example.demo.domain.dish.DishId;
 import com.example.demo.domain.merchant.MerchantId;
 import com.example.demo.domain.order.DeliveryInfo;
@@ -19,6 +14,11 @@ import com.example.demo.domain.order.OrderNumber;
 import com.example.demo.domain.order.OrderStatus;
 import com.example.demo.domain.order.Pricing;
 import com.example.demo.domain.user.UserId;
+import com.example.demo.infrastructure.persistence.order.entity.DeliveryInfoEmbeddable;
+import com.example.demo.infrastructure.persistence.order.entity.OrderEntity;
+import com.example.demo.infrastructure.persistence.order.entity.OrderEntityRepository;
+import com.example.demo.infrastructure.persistence.order.entity.OrderItemEntity;
+import com.example.demo.infrastructure.persistence.order.entity.PricingEmbeddable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -36,7 +36,7 @@ class OrderPersistenceAdapterTest {
     private OrderEntityRepository orderEntityRepository;
 
     @InjectMocks
-    private OrderPersistenceAdapter orderPersistenceAdapter;
+    private OrderJpaRepository orderJpaRepository;
 
     @Test
     void save_should_persist_order_with_all_fields() {
@@ -65,7 +65,7 @@ class OrderPersistenceAdapterTest {
                 now,
                 now);
 
-        orderPersistenceAdapter.save(order);
+        orderJpaRepository.save(order);
 
         verify(orderEntityRepository).save(assertArg(orderEntity -> {
             assertThat(orderEntity)
@@ -138,7 +138,7 @@ class OrderPersistenceAdapterTest {
 
         when(orderEntityRepository.findById("order-001")).thenReturn(Optional.of(orderEntity));
 
-        Optional<Order> result = orderPersistenceAdapter.findById(new OrderId("order-001"));
+        Optional<Order> result = orderJpaRepository.findById(new OrderId("order-001"));
 
         assertThat(result).isPresent();
         Order order = result.get();

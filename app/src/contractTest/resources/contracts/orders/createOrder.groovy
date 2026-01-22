@@ -1,3 +1,5 @@
+package contracts.orders
+
 import static org.springframework.cloud.contract.spec.Contract.make
 
 [

@@ -1,4 +1,4 @@
-package com.example.demo.adapter.persistence.order;
+package com.example.demo.infrastructure.persistence.order.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

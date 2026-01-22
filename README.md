@@ -1,202 +1,212 @@
 # HoCATLing 🐾
 
-HoCATLing，Hands-on Clean Architecture Template Ling，即可落地的整洁架构模板轻量级版本，基于 [HoCAT](https://github.com/macdao/hands-on-clean-architecture-template)，适用于小型项目。
+HoCATLing（Hands-on Clean Architecture Template Ling）是一个基于整洁架构和 DDD 的订餐系统订单管理模块，用于校招技术考核。
 
-## 📋 需求文档
+## 🎯 作业说明
 
-本项目实现了"要吃饱"订餐系统的订单管理功能。详细需求规格请参考：
+本项目已实现基础的订单创建和查询功能，你的任务是：**为订单添加折扣功能**
 
-📄 [需求文档](docs/Requirements.md)
+详细需求请查看：📄 [需求文档](docs/Requirements.md)
+
+### 你需要提交什么？
+
+1. **需求分析文档**：你对折扣功能的理解和验收标准（AC）定义
+2. **领域模型设计**：折扣相关的类设计和包结构
+3. **测试用例**：先写测试，再写实现（TDD）
+4. **实现代码**：通过所有测试的完整实现
+5. **Prompt History**：请使用 AI 辅助开发，需提交完整对话记录
 
 ---
 
-## 🏗️ 架构设计
+## 🏗️ 架构理解
 
-### 设计原则
+本项目采用简化版 Clean Architecture，核心思想是**依赖方向从外向内**：
 
-- **简化项目结构**：不拆分多个独立的组件，所有代码在单一模块中组织
-- **六边形架构**：应用层定义端口接口，适配器实现端口，遵循依赖倒置原则（DIP）
-- **适用场景**：适合小型项目和快速原型开发，同时保持良好的架构边界
-
-### 架构图
-
-![HoCATLing Diagram](https://www.plantuml.com/plantuml/svg/ZPJFRjim3CRlUWe-mFG2Ws6q3TPTjg583pqKnQ1OR29K5ZMAtc1iUVSj0jpObWpib83VZ_pun_PD4iCoz5wbDnUYOTE3nLSpUBcd8DzCZt3lsC2EB7w0hnGeHTEXdV5xxCI4eySxOelyAAF7fhcZ8LZ3Ozk2DUcqaM6wjoDVo1rvuaNMqya9rf8kZPKcWRWt_ZzCu3ERSSRjg8yKCCYQ--AE9zc2tvk00tchJiuYBFf9WemaOqIbU6e59c39_bO0tLGPJ8pUTKOSXQm0NFDlhzeZya_NOGOYiT0Wy40iEL1oe7KxwMUrDBGc2lB7NtWe37SKXCbxv9NmX8VlU_mnO99_lobIIBcNMGRejegLbMvp1rpawtQjrkf1e_MIEokO1NATSYFr9KJav99WwB1OnXuZ9IV4uqhu5CH93iwOo_XPMDCFLulPQ6KuDxushLEJKHuzdncQFrfNwFhKdNSOfBn-3bU36yVF6kXscwhKcczX4G7zNgagRjki5h4oKlKtf8LdIxrnuQLuVkRAz1SQNLHUgvK3d9LwxYYykkF0sVyb6qpV0wLkCDYXzty1)
-
-<details>
-<summary>查看 PlantUML 源码</summary>
-
-```plantuml
-@startuml
-skinparam defaultFontName Fira Code, Monospaced
-skinparam RectangleBorderStyle<<Boundary>> dashed
-skinparam RectangleBackgroundColor<<Boundary>> White
-skinparam RectangleFontStyle<<Boundary>> normal
-skinparam RectangleBackgroundColor Gray
-skinparam ComponentBackgroundColor LightGray
-skinparam ComponentFontStyle bold
-hide <<Boundary>> stereotype
-
-rectangle Boundary <<Boundary>> {
-  component application {
-    rectangle ApplicationService
-    portout Port
-    ApplicationService --> Port
-  }
-
-  component adapter:web {
-    rectangle Controller
-    rectangle Web_Request_Response
-    Controller -> Web_Request_Response
-    rectangle WebAdapter
-    Controller --> WebAdapter
-    Web_Request_Response <-- WebAdapter
-  }
-  WebAdapter --> ApplicationService
-
-  component adapter:persistence {
-    rectangle Repository
-    rectangle Entity
-    Repository -> Entity
-    rectangle PersistenceAdapter
-    PersistenceAdapter --> Repository
-    PersistenceAdapter --> Entity
-  }
-  Port <|-- PersistenceAdapter
-
-  component adapter:client {
-    rectangle Client
-    rectangle Client_Request_Response
-    Client -> Client_Request_Response
-    rectangle ClientAdapter
-    ClientAdapter --> Client
-    ClientAdapter --> Client_Request_Response
-  }
-  Port <|-- ClientAdapter
-
-  ApplicationService -> [domain]
-  WebAdapter --> [domain]
-  [domain] <--- ClientAdapter
-  [domain] <--- PersistenceAdapter
-}
-
-[configuration] --> Boundary
-
-@enduml
+```
+Web层 → Application层 → Domain层 ← Infrastructure层
 ```
 
-</details>
+### 各层职责
 
-### 分层说明
+- **Web 层**（`web/`）：处理 HTTP 请求，参数校验，返回响应
+- **Application 层**（`application/`）：编排业务流程，调用领域对象
+- **Domain 层**（`domain/`）：核心业务逻辑，领域模型和规则
+- **Infrastructure 层**（`infrastructure/`）：技术实现，如数据库访问
 
-| 层级 | 职责 | 示例组件 |
-|------|------|---------|
-| **adapter:web** | 处理 HTTP 请求和响应 | Controller, WebAdapter, Request/Response |
-| **application** | 业务逻辑编排 | ApplicationService, Ports |
-| **adapter:persistence** | 数据持久化 | Repository, Entity, PersistenceAdapter |
-| **adapter:client** | 外部服务调用 | Client, ClientAdapter |
-| **domain** | 领域模型和业务规则 | Domain Objects |
-| **configuration** | 应用配置和依赖注入 | Spring Configuration |
+### 关键设计点
+
+1. **Repository 接口在 Domain 层定义**，由 Infrastructure 层实现（依赖倒置）
+2. **领域对象是充血模型**，包含业务逻辑（如 `Order` 的价格计算）
+3. **使用值对象**（如 `OrderId`、`UserId`）保证类型安全
 
 ---
 
 ## 🚀 快速开始
 
-### 前置条件
+### 环境要求
 
-#### 最低要求
+- Java 21+
+- Gradle 8.x+（项目自带 Gradle Wrapper，无需单独安装）
 
-| 组件 | 版本要求 | 说明 |
-|------|---------|------|
-| **Java** | 21+ | 必需，用于编译和运行应用 |
-| **Gradle** | 8.x+ | 自动包含（使用 Gradle Wrapper） |
-
-#### 可选组件
-
-| 组件 | 用途 | 何时需要 |
-|------|------|---------|
-| **Docker** | 运行 MySQL 容器 | 使用 MySQL 模式时 |
-| **Docker Compose** | 管理容器编排 | 使用 MySQL 模式时 |
-
-### 本地运行测试
-
-#### 模式 1：H2 内存数据库（推荐）
-
-**适用场景**：快速开发、功能测试、演示
+### 启动应用
 
 ```bash
-# 启动应用
+# 使用 H2 内存数据库（默认）
 ./gradlew bootRun
 
-# 访问 H2 控制台（可选）
-# 浏览器打开: http://localhost:8080/h2-console
-# JDBC URL: jdbc:h2:mem:testdb
-# User: sa, Password: (留空)
+# 使用 MySQL（需先启动 Docker Compose）
+docker compose up -d
+./gradlew bootRun --args='--spring.profiles.active=mysql'
 ```
 
-#### 模式 2：MySQL 数据库
+应用启动后访问：`http://localhost:8080`
 
-**适用场景**：集成测试、生产环境模拟、数据持久化需求
+### 测试 API
 
 ```bash
-# 启动应用（自动启动 MySQL 容器）
-./gradlew bootRun --args='--spring.profiles.active=mysql'
+# 创建订单（需要认证，默认用户：user/password）
+curl -X POST http://localhost:8080/api/v1/orders \
+  -u user:password \
+  -H "Content-Type: application/json" \
+  -d '{
+    "merchantId": "merchant-001",
+    "items": [
+      {
+        "dishId": "dish-001",
+        "dishName": "宫保鸡丁",
+        "quantity": 2,
+        "price": 28.00
+      }
+    ],
+    "deliveryInfo": {
+      "recipientName": "张三",
+      "recipientPhone": "13800138000",
+      "address": "北京市朝阳区xxx路xxx号"
+    },
+    "remark": "少辣"
+  }'
 
-# 查看 MySQL 数据（可选）
-docker exec -it app-mysql-1 mysql -u root testdb
+# 查询订单
+curl http://localhost:8080/api/v1/orders/{orderId} -u user:password
 ```
-
-**Docker Compose 配置**：
-- 配置文件：`app/compose.yaml`
-- 镜像：`mysql:lts`
-- 数据库：`testdb`
-- 端口：动态映射
 
 ---
 
-## 🔨 构建和打包
-
-### 编译项目
+## 🧪 运行测试
 
 ```bash
-# 编译 Java 代码
-./gradlew compileJava
-
-# 编译测试代码
-./gradlew compileTestJava
-```
-
-### 运行测试
-
-```bash
-# 运行所有测试
+# 单元测试（快速验证核心逻辑）
 ./gradlew test
 
-# 运行契约测试
+# 集成测试（验证各层协作）
+./gradlew integrationTest
+
+# 契约测试（验证 API 契约）
 ./gradlew contractTest
 
-# 查看测试报告
-open app/build/reports/tests/test/index.html
-```
-
-### 构建项目
-
-```bash
-# 完整构建（编译 + 测试 + 打包）
+# 完整构建（包含代码格式检查和覆盖率验证，要求 70%+）
 ./gradlew build
-
-# 跳过测试的构建
-./gradlew build -x test
 ```
 
-### 打包 Docker 镜像
+测试覆盖率报告：`app/build/reports/jacoco/test/html/index.html`
 
-```bash
-# 使用 Spring Boot Gradle 插件构建镜像
-./gradlew bootBuildImage
+---
 
-# 指定镜像名称和标签
-./gradlew bootBuildImage --imageName=hocatling:latest
+## 📂 代码导航
 
-# 查看构建的镜像
-docker images | grep hocatling
+### 核心文件位置
+
 ```
+app/src/main/java/com/example/demo/
+├── domain/order/
+│   ├── Order.java              # 订单聚合根（核心业务逻辑）
+│   ├── OrderItem.java          # 订单项
+│   ├── Pricing.java            # 价格计算（你需要修改这里）
+│   └── OrderRepository.java    # 仓储接口
+├── application/service/
+│   └── CreateOrderService.java # 创建订单服务
+└── web/order/
+    └── CreateOrderController.java  # 订单 API 端点
+```
+
+### 建议的学习路径
+
+1. **先看测试**：`app/src/test/java/` 和 `app/src/integrationTest/java/`
+2. **理解领域模型**：从 `Order.java` 开始，看懂价格如何计算
+3. **追踪数据流**：Controller → Service → Domain → Repository
+4. **查看数据库映射**：`infrastructure/persistence/order/entity/`
+
+---
+
+
+## � 实现折扣功能的提示
+
+### 思考题
+
+1. 折扣应该是一个什么样的对象？（值对象？实体？）
+2. 折扣逻辑应该放在哪一层？（Domain 层的 `Pricing`？）
+3. 如何设计才能支持未来扩展其他折扣类型？
+4. 折扣信息需要持久化吗？如果需要，如何设计数据库表？
+
+### 推荐步骤
+
+1. **定义 AC**：明确"满减"的计算规则和边界条件
+2. **设计领域模型**：创建 `Discount` 相关类
+3. **编写测试**：先写失败的测试用例
+4. **实现功能**：让测试通过
+5. **集成到 API**：修改 Controller 和 Service
+6. **验证**：运行所有测试，确保覆盖率达标
+
+---
+
+## �🛠️ 技术栈
+
+- **框架**：Spring Boot 3.4.2、Spring Data JPA、Spring Security
+- **数据库**：MySQL 8.0 / H2（内存数据库）
+- **测试**：JUnit 5、AssertJ、Mockito、Spring Cloud Contract
+- **工具**：Spotless（代码格式化）、JaCoCo（覆盖率）、Flyway（数据库迁移）、Lombok
+
+---
+
+## 📚 参考资料
+
+### 架构与设计
+
+- [Clean Architecture 原文](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) - Uncle Bob 的经典文章
+- [DDD 领域驱动设计](https://www.domainlanguage.com/ddd/) - Eric Evans 的 DDD 官方资源
+- [原始模板项目 HoCAT](https://github.com/macdao/hands-on-clean-architecture-template) - 本项目的完整版模板
+
+### 测试框架与工具
+
+- [JUnit 5 用户指南](https://junit.org/junit5/docs/current/user-guide/) - 单元测试框架
+- [AssertJ 文档](https://assertj.github.io/doc/) - 流式断言库（比 JUnit 自带的更好用）
+- [Mockito 文档](https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html) - Mock 框架，用于隔离依赖
+- [Spring Boot Testing](https://docs.spring.io/spring-boot/reference/testing/index.html) - Spring Boot 测试指南
+- [Spring Cloud Contract](https://spring.io/projects/spring-cloud-contract) - 契约测试框架
+
+### Java 新特性
+
+- [Java Record](https://docs.oracle.com/en/java/javase/21/language/records.html) - 本项目大量使用 Record 作为 DTO
+- [Java 21 新特性](https://openjdk.org/projects/jdk/21/) - 了解项目使用的 Java 版本
+
+### Spring 生态
+
+- [Spring Boot 官方文档](https://spring.io/projects/spring-boot) - 框架核心文档
+- [Spring Data JPA](https://spring.io/projects/spring-data-jpa) - 数据持久化
+- [Spring Security](https://spring.io/projects/spring-security) - 安全认证
+- [Bean Validation](https://beanvalidation.org/2.0/spec/) - 参数校验规范（`@NotNull`、`@Valid` 等）
+
+### 工具与规范
+
+- [Lombok](https://projectlombok.org/) - 减少样板代码（`@Getter`、`@RequiredArgsConstructor` 等）
+- [Spotless](https://github.com/diffplug/spotless) - 代码格式化工具
+- [JaCoCo](https://www.jacoco.org/jacoco/) - 测试覆盖率工具
+- [Flyway](https://flywaydb.org/) - 数据库版本管理
+
+### 推荐阅读顺序（应届生）
+
+1. **先跑通项目**：按照"快速开始"运行起来，测试 API
+2. **看懂测试**：从 `CreateOrderServiceTest` 开始，理解 Mockito 和 AssertJ 的用法
+3. **理解领域模型**：阅读 `Order.java` 和 `Pricing.java`，看懂价格计算逻辑
+4. **学习分层架构**：追踪一个请求从 Controller → Service → Domain → Repository 的完整流程
+5. **TDD 实践**：先写测试，再实现折扣功能

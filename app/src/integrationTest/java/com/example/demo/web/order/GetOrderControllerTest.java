@@ -1,4 +1,4 @@
-package com.example.demo.adapter.web.order;
+package com.example.demo.web.order;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;

@@ -1,4 +1,4 @@
-package com.example.demo.adapter.web;
+package com.example.demo.configuration;
 
 import com.example.demo.application.service.OrderNotFoundException;
 import jakarta.validation.ConstraintViolationException;

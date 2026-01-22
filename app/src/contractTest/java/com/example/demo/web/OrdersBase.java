@@ -1,4 +1,4 @@
-package com.example.demo.adapter.web;
+package com.example.demo.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;

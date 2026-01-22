@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
-import com.example.demo.application.port.LoadOrderPort;
 import com.example.demo.application.service.GetOrderService.GetOrderQuery;
 import com.example.demo.application.service.GetOrderService.GetOrderResult;
 import com.example.demo.domain.dish.DishId;
@@ -14,6 +13,7 @@ import com.example.demo.domain.order.Order;
 import com.example.demo.domain.order.OrderId;
 import com.example.demo.domain.order.OrderItem;
 import com.example.demo.domain.order.OrderNumber;
+import com.example.demo.domain.order.OrderRepository;
 import com.example.demo.domain.order.OrderStatus;
 import com.example.demo.domain.order.Pricing;
 import com.example.demo.domain.user.UserId;
@@ -31,7 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class GetOrderServiceTest {
 
     @Mock
-    LoadOrderPort loadOrderPort;
+    OrderRepository orderRepository;
 
     @InjectMocks
     GetOrderService getOrderService;
@@ -61,7 +61,7 @@ class GetOrderServiceTest {
                 createdAt,
                 createdAt);
 
-        when(loadOrderPort.findById(new OrderId(orderId))).thenReturn(Optional.of(order));
+        when(orderRepository.findById(new OrderId(orderId))).thenReturn(Optional.of(order));
 
         GetOrderQuery query = new GetOrderQuery(orderId, userId);
 
@@ -105,7 +105,7 @@ class GetOrderServiceTest {
         String orderId = "non-existent-order";
         String userId = "user-001";
 
-        when(loadOrderPort.findById(new OrderId(orderId))).thenReturn(Optional.empty());
+        when(orderRepository.findById(new OrderId(orderId))).thenReturn(Optional.empty());
 
         GetOrderQuery query = new GetOrderQuery(orderId, userId);
 
@@ -140,7 +140,7 @@ class GetOrderServiceTest {
                 createdAt,
                 createdAt);
 
-        when(loadOrderPort.findById(new OrderId(orderId))).thenReturn(Optional.of(order));
+        when(orderRepository.findById(new OrderId(orderId))).thenReturn(Optional.of(order));
 
         GetOrderQuery query = new GetOrderQuery(orderId, requestingUserId);
 

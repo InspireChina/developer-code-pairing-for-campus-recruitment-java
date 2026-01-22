@@ -1,4 +1,4 @@
-package com.example.demo.adapter.web;
+package com.example.demo.web;
 
 import com.example.demo.application.service.CreateOrderService;
 import com.example.demo.application.service.GetOrderService;

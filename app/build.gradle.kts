@@ -98,7 +98,7 @@ spotless {
 }
 
 contracts {
-    packageWithBaseClasses = "com.example.demo.adapter.web"
+    packageWithBaseClasses = "com.example.demo.web"
 }
 
 tasks.withType<Test>().configureEach {

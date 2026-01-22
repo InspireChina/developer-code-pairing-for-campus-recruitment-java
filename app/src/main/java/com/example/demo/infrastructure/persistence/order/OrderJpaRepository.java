@@ -1,12 +1,5 @@
-package com.example.demo.adapter.persistence.order.adapter;
+package com.example.demo.infrastructure.persistence.order;
 
-import com.example.demo.adapter.persistence.order.DeliveryInfoEmbeddable;
-import com.example.demo.adapter.persistence.order.OrderEntity;
-import com.example.demo.adapter.persistence.order.OrderEntityRepository;
-import com.example.demo.adapter.persistence.order.OrderItemEntity;
-import com.example.demo.adapter.persistence.order.PricingEmbeddable;
-import com.example.demo.application.port.LoadOrderPort;
-import com.example.demo.application.port.SaveOrderPort;
 import com.example.demo.domain.dish.DishId;
 import com.example.demo.domain.merchant.MerchantId;
 import com.example.demo.domain.order.DeliveryInfo;
@@ -14,25 +7,37 @@ import com.example.demo.domain.order.Order;
 import com.example.demo.domain.order.OrderId;
 import com.example.demo.domain.order.OrderItem;
 import com.example.demo.domain.order.OrderNumber;
+import com.example.demo.domain.order.OrderRepository;
 import com.example.demo.domain.order.Pricing;
 import com.example.demo.domain.user.UserId;
+import com.example.demo.infrastructure.persistence.order.entity.DeliveryInfoEmbeddable;
+import com.example.demo.infrastructure.persistence.order.entity.OrderEntity;
+import com.example.demo.infrastructure.persistence.order.entity.OrderEntityRepository;
+import com.example.demo.infrastructure.persistence.order.entity.OrderItemEntity;
+import com.example.demo.infrastructure.persistence.order.entity.PricingEmbeddable;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+/**
+ * JPA implementation of OrderRepository.
+ * This is an infrastructure adapter that implements the domain repository interface.
+ */
 @Component
 @RequiredArgsConstructor
-public class OrderPersistenceAdapter implements SaveOrderPort, LoadOrderPort {
+public class OrderJpaRepository implements OrderRepository {
 
     private final OrderEntityRepository orderEntityRepository;
 
+    @Override
     public void save(Order order) {
         OrderEntity entity = toEntity(order);
         orderEntityRepository.save(entity);
     }
 
+    @Override
     public Optional<Order> findById(OrderId orderId) {
         return orderEntityRepository.findById(orderId.value()).map(this::toDomain);
     }

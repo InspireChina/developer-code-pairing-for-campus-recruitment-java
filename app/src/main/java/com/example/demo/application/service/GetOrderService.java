@@ -1,8 +1,8 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.port.LoadOrderPort;
 import com.example.demo.domain.order.Order;
 import com.example.demo.domain.order.OrderId;
+import com.example.demo.domain.order.OrderRepository;
 import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GetOrderService {
 
-    private final LoadOrderPort loadOrderPort;
+    private final OrderRepository orderRepository;
 
     public record GetOrderQuery(@NotNull String orderId, @NotNull String userId) {}
 
@@ -44,7 +44,7 @@ public class GetOrderService {
     @Transactional(readOnly = true)
     public GetOrderResult getOrder(GetOrderQuery query) {
         // Query order by orderId
-        Order order = loadOrderPort
+        Order order = orderRepository
                 .findById(new OrderId(query.orderId()))
                 .orElseThrow(() -> new OrderNotFoundException("订单不存在: " + query.orderId()));
 

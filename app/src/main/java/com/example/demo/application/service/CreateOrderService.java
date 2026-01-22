@@ -1,11 +1,11 @@
 package com.example.demo.application.service;
 
-import com.example.demo.application.port.SaveOrderPort;
 import com.example.demo.domain.dish.DishId;
 import com.example.demo.domain.merchant.MerchantId;
 import com.example.demo.domain.order.DeliveryInfo;
 import com.example.demo.domain.order.Order;
 import com.example.demo.domain.order.OrderItem;
+import com.example.demo.domain.order.OrderRepository;
 import com.example.demo.domain.user.UserId;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CreateOrderService {
 
-    private final SaveOrderPort saveOrderPort;
+    private final OrderRepository orderRepository;
 
     public record CreateOrderCommand(
             @NotNull String userId,
@@ -68,7 +68,7 @@ public class CreateOrderService {
 
         Order order = new Order(userId, merchantId, items, deliveryInfo, command.remark());
 
-        saveOrderPort.save(order);
+        orderRepository.save(order);
 
         return new CreateOrderResult(
                 order.getId().value(),

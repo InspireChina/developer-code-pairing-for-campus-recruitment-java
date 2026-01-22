@@ -3,11 +3,11 @@ package com.example.demo.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 
-import com.example.demo.application.port.SaveOrderPort;
 import com.example.demo.application.service.CreateOrderService.CreateOrderCommand;
 import com.example.demo.application.service.CreateOrderService.CreateOrderCommand.DeliveryInfoDto;
 import com.example.demo.application.service.CreateOrderService.CreateOrderCommand.OrderItemDto;
 import com.example.demo.domain.order.Order;
+import com.example.demo.domain.order.OrderRepository;
 import com.example.demo.domain.order.Pricing;
 import java.math.BigDecimal;
 import java.util.List;
@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CreateOrderServiceTest {
 
     @Mock
-    SaveOrderPort saveOrderPort;
+    OrderRepository orderRepository;
 
     @InjectMocks
     CreateOrderService createOrderService;
@@ -41,7 +41,7 @@ class CreateOrderServiceTest {
 
         createOrderService.createOrder(command);
 
-        verify(saveOrderPort).save(orderCaptor.capture());
+        verify(orderRepository).save(orderCaptor.capture());
         Order capturedOrder = orderCaptor.getValue();
 
         assertThat(capturedOrder.getUserId().value()).isEqualTo("user-001");
@@ -71,7 +71,7 @@ class CreateOrderServiceTest {
 
         createOrderService.createOrder(command);
 
-        verify(saveOrderPort).save(orderCaptor.capture());
+        verify(orderRepository).save(orderCaptor.capture());
         Order capturedOrder = orderCaptor.getValue();
 
         assertThat(capturedOrder.getStatus().name()).isEqualTo("PENDING_PAYMENT");
