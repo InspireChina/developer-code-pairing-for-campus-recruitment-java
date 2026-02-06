@@ -69,6 +69,13 @@ jobs:
           echo "$CHANGELOG" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: Create source zip (with .git)
+        run: |
+          ZIP_NAME="source-${{ steps.get_version.outputs.version }}.zip"
+          zip -r "$ZIP_NAME" . -x "build/*" -x "app/build/*" -x ".gradle/*" -x "*.zip"
+          mkdir -p release-artifacts
+          mv "$ZIP_NAME" release-artifacts/
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -89,7 +96,7 @@ jobs:
             
             ### 📥 下载说明
             - **JAR 文件**: 可直接运行的应用程序包
-            - **Source code**: 完整的项目源代码
+            - **Source code (zip)**: 完整项目源代码，含 .git 便于本地查看历史
             
             ### 🎓 教学使用
             本项目可作为 Spring Boot 教学模板使用，包含：
@@ -100,6 +107,7 @@ jobs:
             - Spotless 代码格式化
           files: |
             app/build/libs/*.jar
+            release-artifacts/*.zip
           draft: false
           prerelease: false
           generate_release_notes: true
