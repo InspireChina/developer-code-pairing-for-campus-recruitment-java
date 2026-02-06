@@ -71,7 +71,7 @@ jobs:
 
       - name: Create source zip (with .git)
         run: |
-          ZIP_NAME="source-${{ steps.get_version.outputs.version }}.zip"
+          ZIP_NAME="${{ github.event.repository.name }}-${{ steps.get_version.outputs.version_number }}-source.zip"
           zip -r "$ZIP_NAME" . -x "build/*" -x "app/build/*" -x ".gradle/*" -x "*.zip"
           mkdir -p release-artifacts
           mv "$ZIP_NAME" release-artifacts/
@@ -96,7 +96,7 @@ jobs:
             
             ### 📥 下载说明
             - **JAR 文件**: 可直接运行的应用程序包
-            - **Source code (zip)**: 完整项目源代码，含 .git 便于本地查看历史
+            - **Source code (zip)**: `developer-code-pairing-java-x.x.x-source.zip`，完整项目源代码，含 .git 便于本地查看历史
             
             ### 🎓 教学使用
             本项目可作为 Spring Boot 教学模板使用，包含：
